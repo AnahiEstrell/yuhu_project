@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tasks</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            color: #333;
+        }
+
+        #tasks, #new-task {
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            padding: 2rem;
+            margin: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: #555;
+        }
+
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #9b59b6;
+            padding-bottom: 0.5rem;
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #task-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            background-color: #fafafa;
+        }
+
+        #task-list li strong {
+            color: #333;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #9b59b6;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #7d3c98;
+        }
+
+        #task-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #task-form label {
+            margin-top: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+
+        #task-form input[type="text"],
+        #task-form input[type="email"],
+        #task-form textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 0.3rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        #task-form input:focus,
+        #task-form textarea:focus {
+            border-color: #9b59b6;
+            outline: none;
+            box-shadow: 0 0 5px rgba(155, 89, 182, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>Task Dashboard</h1>
+
+    <div id="tasks">
+        <h2>Tasks</h2>
+        <ul id="task-list"></ul>
+    </div>
+
+    <div id="new-task">
+        <h2>Create New Task</h2>
+        <form id="task-form">
+            <label for="titulo">Title:</label>
+            <input type="text" id="titulo" name="titulo" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="descripcion">Description:</label>
+            <textarea id="descripcion" name="descripcion" required></textarea>
+            
+            <button type="button" onclick="createTask()">Create Task</button>
+        </form>
+    </div>
+
+    <script>
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/tasks/');
+                const tasks = await response.json();
+                const taskList = document.getElementById('task-list');
+                taskList.innerHTML = '';
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <strong>${task.titulo}</strong> - ${task.descripcion} 
+                        <button onclick="deleteTask(${task.id})">Delete</button>
+                        <button onclick="updateTask(${task.id})">Update</button>
+                    `;
+                    taskList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+
+        async function createTask() {
+            const titulo = document.getElementById('titulo').value;
+            const email = document.getElementById('email').value;
+            const descripcion = document.getElementById('descripcion').value;
+
+            try {
+                const response = await fetch('/api/tasks/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo, email, descripcion }),
+                });
+
+                if (response.ok) {
+                    alert('Task created successfully');
+                    loadTasks();
+                    document.getElementById('task-form').reset();
+                } else {
+                    const errorData = await response.json();
+                    alert('Error creating task: ' + JSON.stringify(errorData));
+                }
+            } catch (error) {
+                console.error('Error creating task:', error);
+            }
+        }
+
+        async function deleteTask(id) {
+            try {
+                const response = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+
+                if (response.ok) {
+                    alert('Task deleted successfully');
+                    loadTasks();
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error deleting task:', errorData);
+                    alert('Error deleting task: ' + JSON.stringify(errorData));
+                }
+            } catch (error) {
+                console.error('Error deleting task:', error);
+            }
+        }
+
+        async function updateTask(id) {
+            const newTitle = prompt('Ingresa un nuevo titulo:');
+            const newDescription = prompt('Ingresa una nueva descripcion:');
+
+            if (newTitle && newDescription && email) {
+                try {
+                    const response = await fetch(`/api/tasks/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ titulo: newTitle, descripcion: newDescription }),
+                    });
+
+                    if (response.ok) {
+                        alert('Task updated successfully');
+                        loadTasks();
+                    } else {
+                        const errorData = await response.json();
+                        alert('Error updating task: ' + JSON.stringify(errorData));
+                    }
+                } catch (error) {
+                    console.error('Error updating task:', error);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTasks);
+    </script>
+</body>
+</html>
