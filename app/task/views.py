@@ -1,3 +1,5 @@
+from django.core.mail import send_mail
+from django.conf import settings
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 
@@ -31,10 +33,12 @@ class TaskViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             task = serializer.save()
-            send_task_notification.delay(
-                task.email,
+            send_mail(
                 "Nueva tarea creada",
-                f"La tarea '{task.titulo}' ha sido creada exitosamente."
+                f"La tarea '{task.titulo}' ha sido creada exitosamente.",
+                settings.DEFAULT_FROM_EMAIL,
+                [task.email],
+                fail_silently=False,
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -49,10 +53,12 @@ class TaskViewSet(viewsets.ViewSet):
         )
         if serializer.is_valid():
             task = serializer.save()
-            send_task_notification.delay(
-                task.email,
-                "Tarea actualizada",
-                f"La tarea '{task.titulo}' ha sido actualizada exitosamente."
+            send_mail(
+                "Nueva tarea creada",
+                f"La tarea '{task.titulo}' ha sido creada exitosamente.",
+                settings.DEFAULT_FROM_EMAIL,
+                [task.email],
+                fail_silently=False,
             )
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
