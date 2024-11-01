@@ -157,7 +157,8 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'user.User'
 
 # CELERY
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 
 # SMTP CONFIG
 
