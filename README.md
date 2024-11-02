@@ -9,13 +9,13 @@ https://yuhu-project.onrender.com/
 https://yuhu-project.onrender.com/api/docs
 
 # CREDENCIALES DE AUTENTICACIÓN
-usuario: admin@gmail.com
-contraseña: admin
+* usuario: admin@gmail.com
+* contraseña: admin
 
 ## Funcionalidades
 
 * Crear, Leer, Actualizar y Eliminar Tareas: Maneja tareas con título, email y descripción.
-* Notificaciones por Email: Envía notificaciones al crear o actualizar tareas (usando Celery).
+* Notificaciones por Email: Envía notificaciones al crear o actualizar tareas.
 * API Pública: Incluye endpoints para que desarrolladores puedan interactuar con el sistema.
 
 ## Tecnologías aplicadas
