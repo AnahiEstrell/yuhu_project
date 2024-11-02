@@ -14,7 +14,7 @@ https://yuhu-project.onrender.com/api/docs
 
 ## Funcionalidades
 
-* Crear, Leer, Actualizar y Eliminar Tareas: Maneja tareas con título, email y descripción.
+* Crear, Leer, Actualizar y Eliminar Tareas: Maneja tareas con título, email, descripción y fecha de vencimiento.
 * Notificaciones por Email: Envía notificaciones al crear o actualizar tareas.
 * API Pública: Incluye endpoints para que desarrolladores puedan interactuar con el sistema.
 
