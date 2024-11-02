@@ -86,6 +86,7 @@
 
         #task-form input[type="text"],
         #task-form input[type="email"],
+        #task-form input[type="date"],
         #task-form textarea {
             width: 100%;
             padding: 0.8rem;
@@ -106,45 +107,73 @@
     </style>
 </head>
 <body>
-    <h1>Task Dashboard</h1>
-
     <div id="tasks">
-        <h2>Tasks</h2>
+        <h2>TAREAS</h2>
         <ul id="task-list"></ul>
+        <div id="pagination">
+            <button id="prev-button" onclick="loadTasks(previousPageUrl)" disabled>Anterior</button>
+            <button id="next-button" onclick="loadTasks(nextPageUrl)" disabled>Siguiente</button>
+        </div>
     </div>
 
     <div id="new-task">
-        <h2>Create New Task</h2>
+        <h2>Crear Nueva Tarea</h2>
         <form id="task-form">
-            <label for="titulo">Title:</label>
+            <label for="titulo">Titulo:</label>
             <input type="text" id="titulo" name="titulo" required>
             
-            <label for="email">Email:</label>
+            <label for="email">Correo:</label>
             <input type="email" id="email" name="email" required>
             
-            <label for="descripcion">Description:</label>
+            <label for="descripcion">Descripción:</label>
             <textarea id="descripcion" name="descripcion" required></textarea>
+
+            <label for="fecha_vencimiento">Fecha de vencimiento:</label>
+            <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
             
-            <button type="button" onclick="createTask()">Create Task</button>
+            <button type="button" onclick="createTask()">Crear Tarea</button>
         </form>
     </div>
 
     <script>
-        async function loadTasks() {
+        let nextPageUrl = null;
+        let previousPageUrl = null;
+        const token = localStorage.getItem('access_token');
+        
+        async function loadTasks(url = '/api/tasks/') {
+            if (typeof url !== 'string') {
+                return;
+            }
+        
             try {
-                const response = await fetch('/api/tasks/');
-                const tasks = await response.json();
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
                 const taskList = document.getElementById('task-list');
                 taskList.innerHTML = '';
-                tasks.forEach(task => {
+        
+                data.results.forEach(task => {
                     const li = document.createElement('li');
                     li.innerHTML = `
                         <strong>${task.titulo}</strong> - ${task.descripcion} 
+                        <br><em>Email:</em> ${task.email} <br><em>Due Date:</em> ${task.fecha_vencimiento}
                         <button onclick="deleteTask(${task.id})">Delete</button>
                         <button onclick="updateTask(${task.id})">Update</button>
                     `;
                     taskList.appendChild(li);
                 });
+        
+                // Actualiza las URLs de paginación
+                nextPageUrl = data.next;
+                previousPageUrl = data.previous;
+        
+                // Habilita o deshabilita los botones de paginación según corresponda
+                document.getElementById('next-button').disabled = !nextPageUrl;
+                document.getElementById('prev-button').disabled = !previousPageUrl;
             } catch (error) {
                 console.error('Error loading tasks:', error);
             }
@@ -154,41 +183,52 @@
             const titulo = document.getElementById('titulo').value;
             const email = document.getElementById('email').value;
             const descripcion = document.getElementById('descripcion').value;
-
+            const fecha_vencimiento = document.getElementById('fecha_vencimiento').value;
+        
             try {
                 const response = await fetch('/api/tasks/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ titulo, email, descripcion }),
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ titulo, email, descripcion, fecha_vencimiento }),
                 });
-
+        
                 if (response.ok) {
-                    alert('Task created successfully');
+                    alert('Tarea creada exitosamente');
                     loadTasks();
                     document.getElementById('task-form').reset();
                 } else {
                     const errorData = await response.json();
-                    alert('Error creating task: ' + JSON.stringify(errorData));
+                    alert('Error al crear la tarea: ' + JSON.stringify(errorData));
                 }
             } catch (error) {
-                console.error('Error creating task:', error);
+                console.error('Error al crear la tarea:', error);
             }
         }
+        
 
         async function deleteTask(id) {
             try {
-                const response = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+                const response = await fetch(`/api/tasks/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });;
 
                 if (response.ok) {
-                    alert('Task deleted successfully');
+                    alert('Tarea eliminada exitosamente');
                     loadTasks();
                 } else {
                     const errorData = await response.json();
-                    console.error('Error deleting task:', errorData);
-                    alert('Error deleting task: ' + JSON.stringify(errorData));
+                    console.error('Error al eliminar la tarea:', errorData);
+                    alert('Error al eliminar la tarea: ' + JSON.stringify(errorData));
                 }
             } catch (error) {
-                console.error('Error deleting task:', error);
+                console.error('Error al eliminar la tarea:', error);
             }
         }
 
@@ -200,24 +240,29 @@
                 try {
                     const response = await fetch(`/api/tasks/${id}`, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
                         body: JSON.stringify({ titulo: newTitle, descripcion: newDescription }),
                     });
 
                     if (response.ok) {
-                        alert('Task updated successfully');
+                        alert('Tarea actualizada exitosamente');
                         loadTasks();
                     } else {
                         const errorData = await response.json();
-                        alert('Error updating task: ' + JSON.stringify(errorData));
+                        alert('Error al actualizar la tarea: ' + JSON.stringify(errorData));
                     }
                 } catch (error) {
-                    console.error('Error updating task:', error);
+                    console.error('Error al actualizar la tarea:', error);
                 }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadTasks);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks().catch(error => console.error("Error al cargar tareas al iniciar:", error));
+        });
     </script>
 </body>
 </html>

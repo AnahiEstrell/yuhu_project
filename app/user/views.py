@@ -5,7 +5,7 @@ from rest_framework import (
 from drf_spectacular.utils import extend_schema
 
 from user.serializers import UserSerializer
-from user.models import User
+# from user.models import User
 
 from django.shortcuts import render
 

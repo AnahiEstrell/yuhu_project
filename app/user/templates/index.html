@@ -74,12 +74,11 @@
     </style>
 </head>
 <body>
-    <h2>Login</h2>
     <form id="login-form">
-        <label for="email">Email:</label>
+        <label for="email">correo:</label>
         <input type="email" id="email" name="email" required>
         <br>
-        <label for="password">Password:</label>
+        <label for="password">contraseña:</label>
         <input type="password" id="password" name="password" required>
         <br>
         <button type="button" onclick="login()">Login</button>
@@ -105,11 +104,11 @@
                     window.location.href = '/dashboard';
                 } else {
                     const errorData = await response.json();
-                    alert('Login failed: ' + (errorData.detail || 'Unknown error'));
+                    alert('Inicio de sesión fallado: ' + (errorData.detail || 'Error desconocido'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred during login.');
+                alert('A ocurrido un error al inicio de sesión.');
             }
         }
     </script>

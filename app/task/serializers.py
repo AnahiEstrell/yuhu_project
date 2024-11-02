@@ -1,9 +1,17 @@
 from rest_framework import serializers
 from task.models import Task
+from datetime import date
 
 
 class TaskSerializer(serializers.ModelSerializer):
     """Serializer for the task object"""
+
+    def validate_fecha_vencimiento(self, value):
+        if value < date.today():
+            raise serializers.ValidationError(
+                "La fecha de vencimiento debe ser posterior a la fecha actual."
+            )
+        return value
 
     class Meta:
         model = Task
@@ -12,6 +20,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'titulo',
             'email',
             'descripcion',
+            'fecha_vencimiento',
         ]
         read_only_fields = ['id']
 
