@@ -30,7 +30,7 @@ def async_send_mail(subject, message, from_email, recipient_list):
 
 
 class TaskPagination(PageNumberPagination):
-    page_size = 5
+    page_size = 2
     page_size_query_param = 'page'
     max_page_size = 100
 
